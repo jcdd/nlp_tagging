@@ -47,7 +47,7 @@ bool Sample::loadSample(const std::string& file, int window) {
             for(int i = 0; i < window; ++i) {
                 sentenceVec.push_back(elementVec);
             }
-            if (m_sample_vec->size() % 100 == 0) {
+            if (m_sample_vec->size() % 5000 == 0) {
                 std::cout << "[INFO] in loadsample m_sample_vec.size()=" << m_sample_vec->size() << ",m_columu=" << m_columu<< std::endl;
             }
             continue;     
@@ -91,3 +91,15 @@ int Sample::getRow() {
     return m_row;
 }
 
+vector<vector<int> > * Sample::getSample(int index) {
+    if (index >= 0 && index < m_sample_vec->size()) {
+        return &m_sample_vec->at(index);
+    }
+    else {
+        return NULL;
+    }
+}
+
+int Sample::getSampleNum() {
+   return (int)m_sample_vec->size();
+}
