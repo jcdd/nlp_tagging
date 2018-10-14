@@ -4,6 +4,7 @@
 #include "Dictionary.h"
 #include "Template.h"
 #include "Sample.h"
+#include "BeamSearch.h"
 
 
 struct TrainParam{
@@ -12,14 +13,20 @@ struct TrainParam{
      int m_correctNum;
      int m_trainSampleNum;
      int64_t m_trainIndex;
-
+     int m_window;
+     int m_beam_size;
+     Template* m_template;
+     vector<vector<int> > *m_train_sample;
+     Dictionary* m_dict;
+     int m_ngram;
+     vector<map<int,float> >* m_fid2tag2score;
  };
 
 class Model{
   public:
     Model();
     ~Model();
-    bool train(const std::string& template_file, const std::string& sample_file, int window, int epoch, int threadNum, const std::string& model_file);
+    bool train(const std::string& template_file, const std::string& sample_file, int window, int epoch, int threadNum, const std::string& model_file, int beam_size);
     bool processSampleTemplate(Sample* sample, Template* tem);
     float iterator_train(int index, const vector<int>& indexVec, int threadNum);
     bool updateThreadResult(const vector<TrainParam*>& trainParamVec, int threadNum);
@@ -39,6 +46,8 @@ class Model{
     int64_t m_decode_num;
     int64_t m_correct_num;
     int64_t m_train_sample_num;
+    int m_window;
+    int m_beam_size;
 };
 
 #endif

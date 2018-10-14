@@ -17,7 +17,7 @@ int main() {
     */
     Model *model = new Model;
 
-    model->train("data/template.txt", "data/chn-seg-file.txt", 2, 3, 12, "xx");
+    model->train("data/template.txt", "data/chn-seg-file.txt", 2, 3, 12, "xx", 5);
     delete model;
     
 

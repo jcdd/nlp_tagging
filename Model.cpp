@@ -8,6 +8,8 @@ Model::Model(){
   m_decode_num = 0;
   m_correct_num = 0;
   m_train_sample_num = 0;
+  m_beam_size = 0;
+  m_window = 0;
 }
 
 Model::~Model(){
@@ -22,7 +24,9 @@ Model::~Model(){
   }
 }
 
-bool Model::train(const std::string& template_file, const std::string& sample_file, int window, int epoch, int threadNum, const std::string& model_file){
+bool Model::train(const std::string& template_file, const std::string& sample_file, int window, int epoch, int threadNum, const std::string& model_file, int beam_size){
+    m_window = window;
+    m_beam_size = beam_size;
     time_t begin_time = time(NULL);
     if (!m_template->loadTemplate(template_file)) {
         std::cout << "[ERROR] loadTemplate fail..." << std::endl;
@@ -77,9 +81,10 @@ bool Model::processSampleTemplate(Sample* sample, Template* temp) {
 }
 
 void* trainThreadFun(void* fun_param) {
-    //vector<int> test_tag;
+    vector<int> test_tag;
     TrainParam* param = *(TrainParam**)(fun_param);
-    //param->m_decodeVec = beamsearch(test_tag);
+    BeamSearch *bs = new BeamSearch(param->m_beam_size, param->m_window, param->m_ngram, param->m_train_sample, param->m_template, param->m_dict);
+    param->m_decodeNum = bs->beamSearch(param->m_fid2tag2score, test_tag);
     //param->m_correctVec = pkTestAndGold(test_tag, gold_tag)
     std::cout << "thread...." << ",m_trainIndex=" << param->m_trainIndex<<",m_decodeNum="<<param->m_decodeNum<<",m_correctNum="<< param->m_correctNum <<std::endl;
     return NULL;
@@ -104,10 +109,17 @@ float Model::iterator_train(int epoch_index, const vector<int> &indexVec, int th
             for(int i = 0 ;i < threadNum; ++i) {
                 pthread_t threads[threadNum];
                 trainParmVec.at(i)->m_updateWeight.clear();
+                trainParmVec.at(i)->m_fid2tag2score = &m_fid2tag2score;
+                trainParmVec.at(i)->m_template =m_template;
+                trainParmVec.at(i)->m_window = m_window;
+                trainParmVec.at(i)->m_dict = m_dict;
+                trainParmVec.at(i)->m_ngram = m_template->getNgram();
+                trainParmVec.at(i)->m_beam_size = m_beam_size;
                 trainParmVec.at(i)->m_decodeNum = 0;
                 trainParmVec.at(i)->m_correctNum = 0;
                 trainParmVec.at(i)->m_trainSampleNum = 0;
                 trainParmVec.at(i)->m_trainIndex = train_index_vec.at(i);
+                trainParmVec.at(i)->m_train_sample = m_sample->getSample(indexVec.at(i));
                 int rc = pthread_create(&threads[i], NULL, trainThreadFun, (void *)(&trainParmVec.at(i)));
                 if (rc) {
                    std::cout << "[ERROR] pthread_create fail.rc=" << rc << std::endl;

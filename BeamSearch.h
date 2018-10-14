@@ -1,9 +1,22 @@
 #ifndef BEAMSEARCH_H_
 #define BEAMSEARCH_H_
+#include <vector>
+#include <map>
+#include <set>
+#include "Sample.h"
+#include "Template.h"
+#include "Dictionary.h"
 
+using namespace std;
 struct State{
    float m_score;
    vector<int> m_pre_tag;
+};
+
+struct CompareFun{
+   bool operator() (const State* a, const State* b) {
+       return a->m_score > b->m_score;
+   }
 };
 
 class StateStack{
@@ -12,10 +25,10 @@ class StateStack{
     ~StateStack(){}
     int addState(State* state, int ngram) {
        for(size_t i = 0; i < Size(); ++i) {
-           if (needMerge(state, m_state_vec.at(i), ngram)) {
-               if (state->m_score > m_state_vec.at(i)->m_score) {
-                   delete m_state_vec.at(i);
-                   m_state_vec.at(i) = statel;
+           if (needMerge(state, m_state_vec->at(i), ngram)) {
+               if (state->m_score > m_state_vec->at(i)->m_score) {
+                   delete m_state_vec->at(i);
+                   m_state_vec->at(i) = state;
                }
                else {
                    delete state;
@@ -23,7 +36,7 @@ class StateStack{
                return Size();
            }
        }
-       m_state_vec.push_back(state);
+       m_state_vec->push_back(state);
        return Size();
     }
 
@@ -37,32 +50,52 @@ class StateStack{
     }
     
     void Resize(int beam_size) {
-        sort(m_pre_tag.begin(), m_pre_tag.end(), CompareFun);
+        sort(m_state_vec->begin(), m_state_vec->end(), CompareFun());
         if (Size() > beam_size) {
             for(int i = beam_size; i < Size();++i) {
-                delete m_pre_tag.at(i);
+                delete m_state_vec->at(i);
             }
-            m_pre_tag.resize(beam_size);
+            m_state_vec->resize(beam_size);
         }
     }
 
+    void Sort() {
+        sort(m_state_vec->begin(), m_state_vec->end(), CompareFun());
+    }
+ 
     size_t Size() {
-        return m_state_vec.size();
+        return m_state_vec->size();
     }
 
+    State* At(int index) {
+       if (index >= 0 && index < m_state_vec->size()) {
+           return m_state_vec->at(index);
+       }
+       return NULL;
+    }
+   
   private:
-    vector<*State> m_state_vec;
-}
+    vector<State*>* m_state_vec;
+};
 
 class BeamSearch{
   public:
-    BeamSearch() {}
-    ~BeamSearch() {}
-    int beamSearch();
-
+    BeamSearch(int beam_size, int window,int ngram,vector<vector<int> >* sample, Template* temp, Dictionary* dict);
+    ~BeamSearch();
+    int beamSearch(vector<map<int, float> >* fid2tag2score, vector<int>& testTag);
+    void AppendState(State* state, vector<map<int, float> >* fid2tag2score);
+    float getScore(const vector<int>& features, int tagId, const vector<map<int, float> >* fid2tag2score);
+    
   private:
     int m_beam_size;
-
+    int m_window;
+    int m_sample_length;
+    vector<StateStack*>* m_state_vec;
+    vector<vector<int> >*  m_sample;
+    Template* m_template;
+    Dictionary* m_dict;
+    vector<vector<int> >* m_static_feature;
+    int m_ngram;
 };
 
 #endif

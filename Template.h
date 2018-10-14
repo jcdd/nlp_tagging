@@ -47,6 +47,7 @@ class Template{
     bool insertSample2FeatureNode(const std::vector<std::vector<int> >& sample) ;
     bool generateDynamicFeatures(int index, const vector<vector<int> > &testSample,const vector<int>& tagVec, vector<int>& featureVec);
     bool getOneFeature(int index, const vector<vector<int> >& testSample, vector<int>& featureVec, FeatureType f_type, const vector<int>& tagVec);
+    int getNgram() {return m_ngram;}
 
   private:
     int m_ngram;
