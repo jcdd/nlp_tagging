@@ -63,6 +63,7 @@ bool Template::loadTemplate(const std::string &file) {
 int Template::getTemplateNum() {
     return m_template_vec->size();
 }
+
 bool Template::addTemplate(const std::string& line) {
   if (line.empty())  {
       return false;
@@ -174,11 +175,15 @@ int Template::getFeatureId(const vector<int>& featureContext) {
     return curr->m_feature_id;
 }
 
+void print_sample(const std::vector<std::vector<int> >& v) {
+    for (size_t i = 0; i < v.size(); ++i) {
+        std::cout << "hello....." << v[i][0] <<"|"<< v[i][1] << "|" << "|" << v[i][v[i].size()-2] << "|" << v[i][v[i].size()-1] << std::endl;
+    }
+}
 bool Template::insertSample2FeatureNode(const std::vector<std::vector<int> >& sample) {
     vector<int> featureContext;
     for(size_t i = m_window_size; i < sample.size() - m_window_size; ++i) {
         for(size_t j = 0; j < m_template_vec->size(); ++j) {
-                  
             featureContext.clear();
             FeatureTemplate &tmp = m_template_vec->at(j);
             featureContext.push_back(tmp.m_index);

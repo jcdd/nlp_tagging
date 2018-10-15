@@ -15,6 +15,10 @@ Sample::~Sample(){
     m_dict = nullptr;
 }
 
+Dictionary*& Sample::getDict() {
+    return m_dict;
+}
+
 bool Sample::loadSample(const std::string& file, int window) {
     ifstream fin(file);
     if (!fin.is_open()) {
@@ -91,7 +95,7 @@ int Sample::getRow() {
     return m_row;
 }
 
-vector<vector<int> > * Sample::getSample(int index) {
+vector<vector<int> >*& Sample::getSample(int index) {
     if (index >= 0 && index < m_sample_vec->size()) {
         return &m_sample_vec->at(index);
     }

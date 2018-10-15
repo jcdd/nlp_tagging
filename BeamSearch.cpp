@@ -3,9 +3,9 @@
 BeamSearch::BeamSearch(int beam_size, int window, int ngram, vector<vector<int> >* sample, Template* temp, Dictionary* dict) {
     m_beam_size = beam_size;
     m_window = window;
-    m_state_vec = new vector<StateStack*>;
     m_sample = sample;
     m_sample_length = m_sample->size();
+    m_state_vec = new vector<StateStack>;
     m_state_vec->resize(m_sample_length);
     m_template = temp;
     m_static_feature = new vector<vector<int> >;
@@ -15,12 +15,16 @@ BeamSearch::BeamSearch(int beam_size, int window, int ngram, vector<vector<int> 
 }
 
 BeamSearch::~BeamSearch() {
+/*
   for (size_t i = 0; i < m_state_vec->size(); ++i) {
      if (NULL != m_state_vec->at(i)) {
          delete m_state_vec->at(i);
      }
   }
-  delete m_state_vec;
+  */
+  if (NULL != m_state_vec) {
+      delete m_state_vec;
+  }
   if (NULL!=m_static_feature) {
      delete m_static_feature;
   }
@@ -34,19 +38,19 @@ int BeamSearch::beamSearch(vector<map<int, float> >* fid2tag2score, vector<int>&
           string tmp_tag = "B_" + String::ToString(m_window - i);
           state->m_pre_tag.push_back(m_dict->getId(tmp_tag));
       }
-      m_state_vec->at(m_window-1)->addState(state, m_ngram);
+      m_state_vec->at(m_window-1).addState(state, m_ngram);
    }
    int sample_index = m_window;
-   
+   std::cout << "jcdd....sample_index=" <<sample_index <<",m_window=" << m_window << std::endl; 
    for (; sample_index < m_sample_length - m_window; ++sample_index) {
       //GenerateStaticFeatures
       m_template->generateStaticFeatures(sample_index, *m_sample, m_static_feature->at(sample_index));
-      for (int state_index = 0;  state_index < m_state_vec->at(sample_index-1)->Size(); ++state_index) {
-          AppendState(m_state_vec->at(sample_index - 1)->At(state_index), fid2tag2score);
+      for (int state_index = 0;  state_index < m_state_vec->at(sample_index-1).Size(); ++state_index) {
+          AppendState(m_state_vec->at(sample_index - 1).At(state_index), fid2tag2score);
       }
    }
-   m_state_vec->at(sample_index-1)->Sort();
-   testTagVec = m_state_vec->at(sample_index-1)->At(0)->m_pre_tag;
+   m_state_vec->at(sample_index-1).Sort();
+   testTagVec = m_state_vec->at(sample_index-1).At(0)->m_pre_tag;
    //testTagVec.pop_back();
    return (int)testTagVec.size() - m_window;
 }
@@ -65,8 +69,8 @@ void BeamSearch::AppendState(State* state, vector<map<int, float> >* fid2tag2sco
        vector<int> dynamic_feature;
        m_template->generateDynamicFeatures(tIndex, *m_sample, new_state->m_pre_tag, dynamic_feature);
        new_state->m_score += getScore(dynamic_feature, *iter, fid2tag2score);
-       if (m_state_vec->at(tIndex)->addState(new_state, m_ngram) > m_beam_size) {
-           m_state_vec->at(tIndex)->Resize(m_beam_size);
+       if (m_state_vec->at(tIndex).addState(new_state, m_ngram) > m_beam_size) {
+           m_state_vec->at(tIndex).Resize(m_beam_size);
        }
     }
 }

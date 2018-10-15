@@ -21,8 +21,17 @@ struct CompareFun{
 
 class StateStack{
   public:
-    StateStack(){}
-    ~StateStack(){}
+    StateStack(){m_state_vec = new vector<State*>;}
+    ~StateStack(){
+       for (size_t i =0 ; i < Size(); ++i) {
+           if (NULL != m_state_vec->at(i)) {
+               delete m_state_vec->at(i);
+           }
+       }
+       if (NULL != m_state_vec) {
+           delete m_state_vec;
+       }
+    }
     int addState(State* state, int ngram) {
        for(size_t i = 0; i < Size(); ++i) {
            if (needMerge(state, m_state_vec->at(i), ngram)) {
@@ -90,7 +99,7 @@ class BeamSearch{
     int m_beam_size;
     int m_window;
     int m_sample_length;
-    vector<StateStack*>* m_state_vec;
+    vector<StateStack>* m_state_vec;
     vector<vector<int> >*  m_sample;
     Template* m_template;
     Dictionary* m_dict;

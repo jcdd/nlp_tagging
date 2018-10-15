@@ -14,6 +14,7 @@ class Dictionary {
     int getId(const std::string& word);
     int getInsId(const std::string& word);
     bool getWord(int id, std::string& word);
+    std::string getWord(int id);
     size_t wordCount();
     int addWord(const std::string& word);
 

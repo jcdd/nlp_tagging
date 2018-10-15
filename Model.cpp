@@ -64,9 +64,16 @@ bool Model::train(const std::string& template_file, const std::string& sample_fi
     return true;
 }
 
+void print_sample(vector<vector<int> >& v, Dictionary* dict) {
+    for(int i = 0; i < v.size(); ++i) {
+        std::cout << "hello....." << dict->getWord(v[i][0]) <<"|"<< dict->getWord(v[i][1]) << "|" << "|" << dict->getWord(v[i][v[i].size()-2]) << "|" << dict->getWord(v[i][v[i].size()-1]) << std::endl;
+    }   
+}
+
 bool Model::processSampleTemplate(Sample* sample, Template* temp) {
     for(int sampleIndex = 0; sampleIndex < sample->getSampleNum(); ++sampleIndex){
         vector<vector<int> >* train_sample = sample->getSample(sampleIndex);
+        print_sample(*train_sample,m_dict);
         if (train_sample) {
             if (!temp->insertSample2FeatureNode(*train_sample)) {
                 std::cout << "[ERROR] in Model::processSampleTemplate,insertSample2FeatureNode fail.." <<std::endl;
@@ -83,10 +90,15 @@ bool Model::processSampleTemplate(Sample* sample, Template* temp) {
 void* trainThreadFun(void* fun_param) {
     vector<int> test_tag;
     TrainParam* param = *(TrainParam**)(fun_param);
+    std::cout << "......sample=" << param->m_train_sample->size() << std::endl;
     BeamSearch *bs = new BeamSearch(param->m_beam_size, param->m_window, param->m_ngram, param->m_train_sample, param->m_template, param->m_dict);
+    std::cout << "...wc1:m_beam_size="<<param->m_beam_size<<",window="<< param->m_window<<",ngram=" << param->m_ngram << "sample_size=" << param->m_train_sample->size() <<",dict_wordcount="<< param->m_dict->wordCount() << std::endl;
     param->m_decodeNum = bs->beamSearch(param->m_fid2tag2score, test_tag);
     //param->m_correctVec = pkTestAndGold(test_tag, gold_tag)
     std::cout << "thread...." << ",m_trainIndex=" << param->m_trainIndex<<",m_decodeNum="<<param->m_decodeNum<<",m_correctNum="<< param->m_correctNum <<std::endl;
+    if (NULL != bs) {
+        delete bs;
+    }
     return NULL;
 }
 
@@ -112,7 +124,8 @@ float Model::iterator_train(int epoch_index, const vector<int> &indexVec, int th
                 trainParmVec.at(i)->m_fid2tag2score = &m_fid2tag2score;
                 trainParmVec.at(i)->m_template =m_template;
                 trainParmVec.at(i)->m_window = m_window;
-                trainParmVec.at(i)->m_dict = m_dict;
+                trainParmVec.at(i)->m_dict = m_sample->getDict();
+                std::cout << ".....wc=" << m_sample->getDict()->wordCount()<<std::endl;
                 trainParmVec.at(i)->m_ngram = m_template->getNgram();
                 trainParmVec.at(i)->m_beam_size = m_beam_size;
                 trainParmVec.at(i)->m_decodeNum = 0;

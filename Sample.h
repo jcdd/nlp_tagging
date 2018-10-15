@@ -16,8 +16,9 @@ class Sample{
     bool loadSample(const std::string& file, int window);
     int getColumu();
     int getRow();
-    vector<vector<int> >* getSample(int index);
+    vector<vector<int> >*& getSample(int index);
     int getSampleNum();
+    Dictionary*& getDict();
 
   private:
     int m_columu;
