@@ -1,11 +1,12 @@
 #include"Sample.h"
 #include "util.h"
 
-Sample::Sample(Dictionary* dict) {
+Sample::Sample(Dictionary* dict, int window) {
     m_columu = 0;
     m_row = 0;
     m_sample_vec = new vector<vector<vector<int> > >;
     m_dict = dict;
+    m_window = window;
 }
 
 Sample::~Sample(){
@@ -15,7 +16,7 @@ Sample::~Sample(){
     m_dict = nullptr;
 }
 
-Dictionary*& Sample::getDict() {
+Dictionary* Sample::getDict() {
     return m_dict;
 }
 
@@ -83,7 +84,8 @@ bool Sample::loadSample(const std::string& file, int window) {
         sentenceVec.clear();
     }
     fin.close();
-    std::cout << "[INFO] in loadsmaple,over load_sample,m_columu=" << m_columu << ",smaple_size=" << m_sample_vec->size() << ",dict->wordcount=" << m_dict->wordCount() <<std::endl;
+    generateTagDict();
+    std::cout << "[INFO] in loadsmaple,over load_sample,m_columu=" << m_columu << ",smaple_size=" << m_sample_vec->size() << ",dict->wordcount=" << m_dict->wordCount() << ",m_tag2tag.size=" << m_tag2tag.size()<<",m_word2tag.size=" << m_word2tag.size()<<",all_tag_size="<<m_all_tag.size() <<std::endl;
     return true;
 }
 
@@ -95,7 +97,7 @@ int Sample::getRow() {
     return m_row;
 }
 
-vector<vector<int> >*& Sample::getSample(int index) {
+vector<vector<int> >* Sample::getSample(int index) {
     if (index >= 0 && index < m_sample_vec->size()) {
         return &m_sample_vec->at(index);
     }
@@ -106,4 +108,32 @@ vector<vector<int> >*& Sample::getSample(int index) {
 
 int Sample::getSampleNum() {
    return (int)m_sample_vec->size();
+}
+
+void Sample::generateTagDict() {
+   for (size_t i = 0; i < m_sample_vec->size(); ++i) {
+       const vector<vector<int> >& train_sample = m_sample_vec->at(i);
+       for (size_t j = m_window; j < train_sample.size() - m_window; ++j) {
+          int curr_tag = train_sample.at(j).back();
+          m_all_tag.insert(curr_tag);
+          int pre_tag = train_sample.at(j-1).back();
+          if (m_tag2tag.find(pre_tag) != m_tag2tag.end()) {
+              m_tag2tag[pre_tag].insert(curr_tag);
+          }
+          else {
+              set<int> tmp_set;
+              tmp_set.insert(curr_tag);
+              m_tag2tag[pre_tag] = tmp_set;
+          }
+          int curr_word = train_sample.at(j).front();
+          if (m_word2tag.find(curr_word) != m_word2tag.end()) {
+              m_word2tag[curr_word].insert(curr_tag);
+          }
+          else {
+              set<int> tmp_set;
+              tmp_set.insert(curr_tag);
+              m_word2tag[curr_word] = tmp_set;
+          }
+       }
+   }
 }

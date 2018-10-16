@@ -56,7 +56,7 @@ bool Template::loadTemplate(const std::string &file) {
   if (m_ngram > m_window_size) {
       m_window_size = m_ngram;
   }
-  std::cout << "[INFO] in loadTemplate over,m_ngram=" << m_ngram << ",m_window_size=" << m_window_size << ",m_max_col=" << m_max_col << ",m_dynamic_template_size=" << m_dynamic_template_size << ",m_static_template_size=" << m_static_template_size << ",m_temple_vec.size()=" << m_template_vec->size() << std::endl;
+  std::cout << "[INFO] in loadTemplate over,m_ngram=" << m_ngram << ",m_window_size=" << m_window_size << ",m_max_col=" << m_max_col << ",m_dynamic_template_size=" << m_dynamic_template_size << ",m_static_template_size=" << m_static_template_size << ",m_temple_vec.size()=" << getTemplateNum() << std::endl;
    return true;
 }
 
@@ -222,6 +222,11 @@ bool Template::generateDynamicFeatures(int index, const vector<vector<int> > &te
     return getOneFeature(index, testSample, featureVec, f_type, tagVec);
 }
 
+bool Template::generateFeatures(int index, const vector<vector<int> > &testSample, const vector<int>& tagVec, vector<int>& featureVec) {
+    FeatureType f_type = all_feature;
+    return getOneFeature(index, testSample, featureVec, f_type, tagVec);
+}    
+
 bool Template::getOneFeature(int index, const vector<vector<int> >& testSample, vector<int>& featureVec, FeatureType f_type, const vector<int>& tagVec) {
     if (index < m_window_size || index >= (int)testSample.size() - m_window_size) {
         std::cout << "[ERROR] in Tempplate::generateStaticFeatures ,index_error, index = " << index << ",testSample.size()=" << testSample.size() << ",m_window_size=" << m_window_size << std::endl;
@@ -270,8 +275,8 @@ bool Template::getOneFeature(int index, const vector<vector<int> >& testSample, 
             if (col > (int)testSample.at(index).size() - 1) {
                 std::cout << "[ERROR] in generateStaticFeature error,col=" << col << ",sample_size=" << testSample.at(index).size() << std::endl;
                 return false;
-                featureContext.push_back(testSample.at(index + row).at(col));
             }
+            featureContext.push_back(testSample.at(index + row).at(col));
         }
         if (f_type == dynamic_feature) {
             for (size_t k = 0; k < tmp.y.size(); ++k) {
@@ -284,7 +289,21 @@ bool Template::getOneFeature(int index, const vector<vector<int> >& testSample, 
             featureVec.push_back(feature_id);
         }
         else {
-            std::cout << "[WARING] in generateStaticFeature, feature_id=" << feature_id << std::endl;
+            std::string flag = "";
+            if (f_type == dynamic_feature) {
+                flag = "dynamic_feature";
+            }
+            else if (f_type== static_feature) {
+                flag = "static_feature";
+            }
+            else if (f_type == all_feature) {
+               flag = "all_feature";
+            }
+            std::cout << "[WARING] in generate"<<flag << ", feature_id=" << feature_id << ":" ;
+            for(int i = 0; i < featureContext.size(); ++i) {
+                std::cout << featureContext[i]<<"|";
+            }
+            std::cout << std::endl;
         }
     } 
     return true;

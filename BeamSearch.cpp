@@ -30,7 +30,7 @@ BeamSearch::~BeamSearch() {
   }
 }
 
-int BeamSearch::beamSearch(vector<map<int, float> >* fid2tag2score, vector<int>& testTagVec) {
+int BeamSearch::beamSearch(vector<map<int, float> >* fid2tag2score, vector<int>& testTagVec, const map<int, set<int> >& word2tag, const map<int, set<int> >& tag2tag, const set<int>& all_tag) {
    if(m_window > 0)  {
       State* state = new State;
       state->m_score = 0.0;
@@ -41,12 +41,16 @@ int BeamSearch::beamSearch(vector<map<int, float> >* fid2tag2score, vector<int>&
       m_state_vec->at(m_window-1).addState(state, m_ngram);
    }
    int sample_index = m_window;
-   std::cout << "jcdd....sample_index=" <<sample_index <<",m_window=" << m_window << std::endl; 
    for (; sample_index < m_sample_length - m_window; ++sample_index) {
       //GenerateStaticFeatures
+      std::cout << "...sample_index=" << sample_index<<",m_window=" << m_window<<",m_children_map.size=" << m_template->m_trie_root->m_children_map.size() << " ";
+      for(int  i = 0; i < m_sample->size(); ++i) {
+          std::cout << m_dict->getWord(m_sample->at(i).front()) << "|" << m_dict->getWord(m_sample->at(i).back())<<"~";
+      }
+      std::cout << std::endl;
       m_template->generateStaticFeatures(sample_index, *m_sample, m_static_feature->at(sample_index));
       for (int state_index = 0;  state_index < m_state_vec->at(sample_index-1).Size(); ++state_index) {
-          AppendState(m_state_vec->at(sample_index - 1).At(state_index), fid2tag2score);
+          AppendState(m_state_vec->at(sample_index - 1).At(state_index), fid2tag2score, word2tag, tag2tag, all_tag);
       }
    }
    m_state_vec->at(sample_index-1).Sort();
@@ -55,11 +59,11 @@ int BeamSearch::beamSearch(vector<map<int, float> >* fid2tag2score, vector<int>&
    return (int)testTagVec.size() - m_window;
 }
 
-void BeamSearch::AppendState(State* state, vector<map<int, float> >* fid2tag2score) {
+void BeamSearch::AppendState(State* state, vector<map<int, float> >* fid2tag2score, const map<int, set<int> >& word2tag, const map<int, set<int> >& tag2tag, const set<int>& all_tag) {
     set<int> tagSet;
     int tIndex = (int)state->m_pre_tag.size();
-    //to do.....
-    //getNextTagSet(state->m_pre_tag.back(), m_sample->at(tIndex).at(0), tagSet);
+    getNextTagSet(state->m_pre_tag.back(), m_sample->at(tIndex).at(0), tagSet, word2tag, tag2tag, all_tag);
+    std::cout << "in BeamSearch::AppendState getNextTagSet=" << tagSet.size() << std::endl;
     for(set<int>::iterator iter = tagSet.begin(); iter != tagSet.end(); ++iter) {
        State *new_state = new State;
        new_state->m_score = state->m_score + getScore(m_static_feature->at(tIndex), *iter, fid2tag2score);
@@ -85,4 +89,25 @@ float BeamSearch::getScore(const vector<int>& features, int tagId, const vector<
         }
     }
     return score;
+}
+
+void  BeamSearch::getNextTagSet(int curr_word, int pre_tag, set<int>& next_tag, const map<int, set<int> >& word2tag, const map<int, set<int> >& tag2tag, const set<int>& all_tag) {
+    map<int, set<int> >::const_iterator iter1 = word2tag.find(curr_word);
+    map<int, set<int> >::const_iterator iter2 = tag2tag.find(curr_word);
+
+    if (iter1 != word2tag.end()) {
+        if (iter2 != tag2tag.end())  {
+            for(set<int>::const_iterator set_iter1 = iter1->second.begin(); set_iter1 != iter1->second.end(); ++set_iter1) {
+                if (iter2->second.find(*set_iter1) != iter2->second.end())  {
+                     next_tag.insert(*set_iter1);
+                }
+            }
+        }
+        if (next_tag.empty()) {
+            next_tag = iter1->second;
+        }
+    }
+    if (next_tag.empty()) {
+        next_tag = all_tag;
+    }
 }

@@ -15,11 +15,9 @@ int main() {
     Template temp;
     temp.loadTemplate("data/template.txt");
     */
-    Model *model = new Model;
+    Model *model = new Model(1,2,5);
 
-    model->train("data/template.txt", "data/chn-seg-file.txt.tmp", 2, 1, 1, "xx", 5);
+    model->train("data/template.txt", "data/chn-seg-file.txt.tmp", 2, "xx");
     delete model;
-    
-
     return 1;
 }

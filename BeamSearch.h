@@ -9,6 +9,7 @@
 
 using namespace std;
 struct State{
+   State() {m_score = 0.0;}
    float m_score;
    vector<int> m_pre_tag;
 };
@@ -91,9 +92,10 @@ class BeamSearch{
   public:
     BeamSearch(int beam_size, int window,int ngram,vector<vector<int> >* sample, Template* temp, Dictionary* dict);
     ~BeamSearch();
-    int beamSearch(vector<map<int, float> >* fid2tag2score, vector<int>& testTag);
-    void AppendState(State* state, vector<map<int, float> >* fid2tag2score);
+    int beamSearch(vector<map<int, float> >* fid2tag2score, vector<int>& testTag, const map<int, set<int> >& word2tag, const map<int, set<int> >& tag2tag, const set<int>& all_tag);
+    void AppendState(State* state, vector<map<int, float> >* fid2tag2score, const map<int, set<int> >& word2tag, const map<int, set<int> >& tag2tag, const set<int>& all_tag);
     float getScore(const vector<int>& features, int tagId, const vector<map<int, float> >* fid2tag2score);
+    void getNextTagSet(int curr_word, int pre_tag, set<int>& next_tag, const map<int, set<int> >& word2tag, const map<int, set<int> >& tag2tag, const set<int>& all_tag);
     
   private:
     int m_beam_size;

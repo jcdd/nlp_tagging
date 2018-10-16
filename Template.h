@@ -46,10 +46,13 @@ class Template{
     int insertNode(const vector<int>& featureContext);
     bool insertSample2FeatureNode(const std::vector<std::vector<int> >& sample) ;
     bool generateDynamicFeatures(int index, const vector<vector<int> > &testSample,const vector<int>& tagVec, vector<int>& featureVec);
+    bool generateFeatures(int index, const vector<vector<int> > &testSample,const vector<int>& tagVec, vector<int>& featureVec);
     bool getOneFeature(int index, const vector<vector<int> >& testSample, vector<int>& featureVec, FeatureType f_type, const vector<int>& tagVec);
     int getNgram() {return m_ngram;}
+    set<int> getTagSet() {return m_tag_set;}
+    int getFeatureSize() {return m_feature_size;}
 
-  private:
+  public:
     int m_ngram;
     int m_window_size;
     int m_max_col;

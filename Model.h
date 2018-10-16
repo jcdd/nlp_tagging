@@ -8,6 +8,11 @@
 
 
 struct TrainParam{
+  public:
+     TrainParam(Template* temp, Dictionary* dict) {
+         m_template = temp;
+         m_dict = dict;
+     }
      vector<map<int, float> > m_updateWeight;
      int m_decodeNum;
      int m_correctNum;
@@ -20,18 +25,23 @@ struct TrainParam{
      Dictionary* m_dict;
      int m_ngram;
      vector<map<int,float> >* m_fid2tag2score;
+     map<int, set<int> > m_word2tag;
+     map<int, set<int> > m_tag2tag;
+     set<int> m_all_tag;
  };
 
 class Model{
   public:
-    Model();
+    Model(int threadNum, int window, int beamsize);
     ~Model();
-    bool train(const std::string& template_file, const std::string& sample_file, int window, int epoch, int threadNum, const std::string& model_file, int beam_size);
-    bool processSampleTemplate(Sample* sample, Template* tem);
+    bool train(const std::string& template_file, const std::string& sample_file, int epoch, const std::string& model_file);
+    bool processSampleTemplate();
     float iterator_train(int index, const vector<int>& indexVec, int threadNum);
-    bool updateThreadResult(const vector<TrainParam*>& trainParamVec, int threadNum);
+    bool updateThreadResult(const vector<TrainParam>& trainParamVec, int threadNum);
     bool avgWeight(int64_t num);
     bool saveModel(const std::string& file);
+    void initTrainParam();
+    static void* trainThreadFun(void* fun_param);
 
 
   private:
@@ -48,6 +58,8 @@ class Model{
     int64_t m_train_sample_num;
     int m_window;
     int m_beam_size;
+    int m_threadNum;
+    vector<TrainParam> m_trainParmVec;
 };
 
 #endif
