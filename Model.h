@@ -28,6 +28,7 @@ struct TrainParam{
      map<int, set<int> > m_word2tag;
      map<int, set<int> > m_tag2tag;
      set<int> m_all_tag;
+     vector<int> m_test_tag;
  };
 
 class Model{
@@ -40,8 +41,10 @@ class Model{
     bool updateThreadResult(const vector<TrainParam>& trainParamVec, int threadNum);
     bool avgWeight(int64_t num);
     bool saveModel(const std::string& file);
+    bool loadModel(const std::string& file);
     void initTrainParam();
     static void* trainThreadFun(void* fun_param);
+    bool predict(const std::vector<std::string>& sample, vector<std::strng>& test_tag);
 
 
   private:

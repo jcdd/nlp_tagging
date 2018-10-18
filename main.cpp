@@ -15,9 +15,14 @@ int main() {
     Template temp;
     temp.loadTemplate("data/template.txt");
     */
-    Model *model = new Model(1,2,5);
+    int threadNum = 10;
+    int epoch = 50;
+    int window = 2;
+    int beam_size = 5;
 
-    model->train("data/template.txt", "data/chn-seg-file.txt.tmp", 2, "xx");
+    Model *model = new Model(threadNum, window, beam_size);
+
+    model->train("data/template.txt", "data/chn-seg-file.txt_1k", epoch, "xx");
     delete model;
     return 1;
 }

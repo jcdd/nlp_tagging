@@ -21,6 +21,7 @@ public:
     static inline bool StartsWith(const std::string& str, const std::string& prefix);
     static inline bool EndsWith(const std::string& str, const std::string& suffix);
     static  int Str2Int(const std::string& str);
+    static  float Str2Float(const std::string& str);
     static inline bool IsAsciiPunctuation(char str);
     static inline bool IsPrintableAscii(char str);
     static inline bool IsPrintableAscii(const std::string& str);

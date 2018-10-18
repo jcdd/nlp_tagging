@@ -1,11 +1,11 @@
 #include "Dictionary.h"
+#include "util.h"
 
 Dictionary::Dictionary() {}
 
 Dictionary::~Dictionary() {}
 
 int Dictionary::getId(const std::string& word) {
-    std::cout << ".....debug..." << word << "," << m_word2id.size() << std::endl;
     std::map<std::string, int>::iterator iter = m_word2id.find(word);
     if (iter != m_word2id.end()) {
         return iter->second;

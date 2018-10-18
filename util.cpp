@@ -13,6 +13,11 @@ int String::Str2Int(const std::string& str) {
     return tmp;
 }
 
+float String::Str2Float(const std::string& str) {
+   float tmp = atof(str.c_str());
+   return tmp;
+}
+
 int String::SplitUtf8(const std::string& str, const unsigned char* chardel,
                       std::vector<std::string>& result, bool rm)
 {

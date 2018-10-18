@@ -102,7 +102,7 @@ bool Template::addTemplate(const std::string& line) {
            std::cout << "[ERROR] in add_template,error template=" << line << std::endl;
            return false;
         }
-    }
+     }
   }
 
   beginIndex = line.find("%y[",0);
@@ -278,7 +278,7 @@ bool Template::getOneFeature(int index, const vector<vector<int> >& testSample, 
             }
             featureContext.push_back(testSample.at(index + row).at(col));
         }
-        if (f_type == dynamic_feature) {
+        if (f_type == dynamic_feature || f_type == all_feature) {
             for (size_t k = 0; k < tmp.y.size(); ++k) {
                 int row = tmp.y.at(k);
                 featureContext.push_back(tagVec.at(index + row));
@@ -299,7 +299,7 @@ bool Template::getOneFeature(int index, const vector<vector<int> >& testSample, 
             else if (f_type == all_feature) {
                flag = "all_feature";
             }
-            std::cout << "[WARING] in generate"<<flag << ", feature_id=" << feature_id << ":" ;
+            std::cout << "[WARING] in generate "<<flag << ", feature_id=" << feature_id << ":" ;
             for(int i = 0; i < featureContext.size(); ++i) {
                 std::cout << featureContext[i]<<"|";
             }

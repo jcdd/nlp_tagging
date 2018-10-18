@@ -43,11 +43,14 @@ int BeamSearch::beamSearch(vector<map<int, float> >* fid2tag2score, vector<int>&
    int sample_index = m_window;
    for (; sample_index < m_sample_length - m_window; ++sample_index) {
       //GenerateStaticFeatures
-      std::cout << "...sample_index=" << sample_index<<",m_window=" << m_window<<",m_children_map.size=" << m_template->m_trie_root->m_children_map.size() << " ";
-      for(int  i = 0; i < m_sample->size(); ++i) {
-          std::cout << m_dict->getWord(m_sample->at(i).front()) << "|" << m_dict->getWord(m_sample->at(i).back())<<"~";
+       /*
+      if (sample_index == m_window) {
+          for(int  i = 0; i < m_sample->size(); ++i) {
+              std::cout << m_dict->getWord(m_sample->at(i).front()) << "|" << m_dict->getWord(m_sample->at(i).back())<<"~";
+          }
+          std::cout << std::endl;
       }
-      std::cout << std::endl;
+      */
       m_template->generateStaticFeatures(sample_index, *m_sample, m_static_feature->at(sample_index));
       for (int state_index = 0;  state_index < m_state_vec->at(sample_index-1).Size(); ++state_index) {
           AppendState(m_state_vec->at(sample_index - 1).At(state_index), fid2tag2score, word2tag, tag2tag, all_tag);
@@ -63,7 +66,6 @@ void BeamSearch::AppendState(State* state, vector<map<int, float> >* fid2tag2sco
     set<int> tagSet;
     int tIndex = (int)state->m_pre_tag.size();
     getNextTagSet(state->m_pre_tag.back(), m_sample->at(tIndex).at(0), tagSet, word2tag, tag2tag, all_tag);
-    std::cout << "in BeamSearch::AppendState getNextTagSet=" << tagSet.size() << std::endl;
     for(set<int>::iterator iter = tagSet.begin(); iter != tagSet.end(); ++iter) {
        State *new_state = new State;
        new_state->m_score = state->m_score + getScore(m_static_feature->at(tIndex), *iter, fid2tag2score);

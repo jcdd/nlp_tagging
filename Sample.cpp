@@ -33,7 +33,11 @@ bool Sample::loadSample(const std::string& file, int window) {
         sentenceVec.push_back(elementVec);
     }
     std::vector<std::string>::iterator iter;
+    int tmp_count = 0;
     while(getline(fin, line)) {
+        if (tmp_count++ == 0 && line.substr(0,2) == "##") {
+            continue;
+        }
         String::Trim(line);
         if (line.empty()) {
             //每句话的分隔符，空行

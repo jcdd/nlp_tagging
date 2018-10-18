@@ -51,6 +51,7 @@ class Template{
     int getNgram() {return m_ngram;}
     set<int> getTagSet() {return m_tag_set;}
     int getFeatureSize() {return m_feature_size;}
+    FeatureTemplate getTemplate(int x) {return m_template_vec->at(x);}
 
   public:
     int m_ngram;
